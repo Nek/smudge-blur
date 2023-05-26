@@ -1,4 +1,7 @@
+#ifdef GL_ES
 precision mediump float;
+#endif
+
 attribute vec2 position;
 varying vec2 uv;
 void main() {
