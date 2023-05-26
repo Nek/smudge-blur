@@ -1,6 +1,12 @@
 lockfileVersion: '6.0'
 
 dependencies:
+  mouse-change:
+    specifier: ^1.4.0
+    version: 1.4.0
+  regl:
+    specifier: ^2.1.0
+    version: 2.1.0
   solid-js:
     specifier: ^1.6.10
     version: 1.6.10
@@ -772,6 +778,16 @@ packages:
       is-what: 4.1.8
     dev: true
 
+  /mouse-change@1.4.0:
+    resolution: {integrity: sha512-vpN0s+zLL2ykyyUDh+fayu9Xkor5v/zRD9jhSqjRS1cJTGS0+oakVZzNm5n19JvvEj0you+MXlYTpNxUDQUjkQ==}
+    dependencies:
+      mouse-event: 1.0.5
+    dev: false
+
+  /mouse-event@1.0.5:
+    resolution: {integrity: sha512-ItUxtL2IkeSKSp9cyaX2JLUuKk2uMoxBg4bbOWVd29+CskYJR9BGsUqtXenNzKbnDshvupjUewDIYVrOB6NmGw==}
+    dev: false
+
   /ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
     dev: true
@@ -802,6 +818,10 @@ packages:
       picocolors: 1.0.0
       source-map-js: 1.0.2
     dev: true
+
+  /regl@2.1.0:
+    resolution: {integrity: sha512-oWUce/aVoEvW5l2V0LK7O5KJMzUSKeiOwFuJehzpSFd43dO5spP9r+sSUfhKtsky4u6MCqWJaRL+abzExynfTg==}
+    dev: false
 
   /resolve@1.22.1:
     resolution: {integrity: sha512-nBpuuYuY5jFsli/JIs1oldw6fOQCBioohqWZg/2hiaOybXOft4lonv85uDOKXdf8rhyK159cxU5cDcK/NKk8zw==}
