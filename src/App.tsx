@@ -91,13 +91,11 @@ type DisplacementUniforms = {
   texture: initRegl.Texture2D,
   texOffset?: [number, number],
   map: initRegl.Texture2D,
-  mode?: number,
+  scale?: number,
   amp?: number,
-  divider?: number,
-  rotRange?: number,
 }
 
-function makeDrawDisplacement({ texture, texOffset = [0, 0], map, mode = 0, amp = 0.1, divider = 0.5, rotRange = 6.283185307179586 }: DisplacementUniforms) {
+function makeDrawDisplacement({ texture, texOffset = [- 0.25, - 0.25], map, scale = 1.001, amp = 0.1 }: DisplacementUniforms) {
   return ({
     frag: fsDisplacement,
 
@@ -114,10 +112,8 @@ function makeDrawDisplacement({ texture, texOffset = [0, 0], map, mode = 0, amp 
       texture,
       texOffset,
       map,
-      mode,
+      scale,
       amp,
-      divider,
-      rotRange,
     },
 
     count: 3
