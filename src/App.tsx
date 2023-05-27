@@ -95,7 +95,7 @@ type DisplacementUniforms = {
   amp?: number,
 }
 
-function makeDrawDisplacement({ texture, texOffset = [- 0.25, - 0.25], map, scale = 1.001, amp = 0.1 }: DisplacementUniforms) {
+function makeDrawDisplacement({ texture, texOffset = [0, 0], map, scale = 2.0, amp = 0.0025 }: DisplacementUniforms) {
   return ({
     frag: fsDisplacement,
 
@@ -158,8 +158,9 @@ function App() {
       ...makeDrawDisplacement({
         texture: pixels,
         map: mapFbo,
-        mode: 3,
-        amp: 0.01,
+        amp: 0.001,
+        scale: 1.002,
+        texOffset: [0, 0]
       })
     })
 

@@ -15,7 +15,9 @@ void main() {
     // Scale the space in order to see the function
     // st *= 1.;
 
-    color = snoise3(vec3(st, 1.));
+    color = snoise3(vec3(st, .1));
+    color *= 0.5;
+    color += .5;
 
     gl_FragColor = vec4(color,1.0);
 }
