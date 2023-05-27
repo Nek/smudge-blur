@@ -12,10 +12,11 @@ import fsNoise from "./shaders/2d-snoise.frag"
 import fsBasic from "./shaders/basic.frag"
 
 type NoiseUniforms = {
-  resolution: () => [number, number]
+  resolution: () => [number, number],
+  scale: [number, number],
 }
 
-function makeDrawNoise() {
+function makeDrawNoise({scale = [1, 1]}) {
   return ({
     frag: fsNoise,
 
@@ -30,6 +31,7 @@ function makeDrawNoise() {
 
     uniforms: {
       resolution: ({ viewportWidth, viewportHeight }: { viewportWidth: number, viewportHeight: number }) => [viewportWidth, viewportHeight],
+      scale,
     },
 
     count: 3
@@ -165,7 +167,7 @@ function App() {
     })
 
     const drawNoise = regl({
-      ...makeDrawNoise(),
+      ...makeDrawNoise({scale: [0.01, 0.01]}),
       framebuffer: () => mapFbo
     })
 
