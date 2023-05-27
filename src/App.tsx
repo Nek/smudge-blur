@@ -5,11 +5,11 @@ import initRegl from 'regl'
 //@ts-ignore
 import initMouse from 'mouse-change'
 
-import fsFeedback from "./shaders/feedback.frag?raw"
-import vsBasicUV from "./shaders/basic-uv.vert?raw"
-import fsDisplacement from "./shaders/displacement.frag?raw"
-import fsNoise from "./shaders/2d-snoise.frag?raw"
-import fsBasic from "./shaders/basic.frag?raw"
+import fsFeedback from "./shaders/feedback.frag"
+import vsBasicUV from "./shaders/basic-uv.vert"
+import fsDisplacement from "./shaders/displacement.frag"
+import fsNoise from "./shaders/2d-snoise.frag"
+import fsBasic from "./shaders/basic.frag"
 
 
 type NoiseUniforms = {

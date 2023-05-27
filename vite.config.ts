@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
+import glsl from "vite-plugin-glsl";
 
 export default defineConfig({
-  plugins: [solidPlugin()],
+  plugins: [glsl(), solidPlugin()],
   server: {
     port: 3000,
   },
