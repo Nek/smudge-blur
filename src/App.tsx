@@ -90,14 +90,15 @@ function makeDrawBasic({ texture }: { texture: initRegl.Texture2D }) {
 }
 
 type DisplacementUniforms = {
-  texture: initRegl.Texture2D,
+  feedbackTexture: initRegl.Texture2D,
+  startingImageTexture: initRegl.Texture2D,
   texOffset?: [number, number],
-  map: initRegl.Texture2D,
+  displacementMap: initRegl.Texture2D,
   scale?: number,
   amp?: number,
 }
 
-function makeDrawDisplacement({ texture, texOffset = [0, 0], map, scale = 2.0, amp = 0.0025 }: DisplacementUniforms) {
+function makeDrawDisplacement({ feedbackTexture, startingImageTexture, texOffset = [0, 0], displacementMap, scale = 2.0, amp = 0.0025 }: DisplacementUniforms) {
   return ({
     frag: fsDisplacement,
 
@@ -111,9 +112,10 @@ function makeDrawDisplacement({ texture, texOffset = [0, 0], map, scale = 2.0, a
     },
 
     uniforms: {
-      texture,
+      feedbackTexture,
+      startingImageTexture,
       texOffset,
-      map,
+      displacementMap,
       scale,
       amp,
     },
@@ -138,9 +140,11 @@ function App() {
     const regl = initRegl()
     const mouse = initMouse()
 
-    const image = await loadImage(imageUrl)
+    const startingImage = await loadImage(imageUrl)
 
-    const pixels = regl.texture({data: image, flipY: true})
+    const startingImageTexture = regl.texture({data: startingImage, flipY: true})
+
+    const feedbackTexture = regl.texture({data: startingImage, flipY: true})
 
     const displacementFbo = regl.framebuffer({
       width: 1024,
@@ -158,8 +162,9 @@ function App() {
 
     const drawDisplacement = regl({
       ...makeDrawDisplacement({
-        texture: pixels,
-        map: mapFbo,
+        feedbackTexture,
+        startingImageTexture,
+        displacementMap: mapFbo,
         amp: 0.001,
         scale: 1.002,
         texOffset: [0, 0]
@@ -186,7 +191,7 @@ function App() {
 
       drawDisplacement()
 
-      pixels({ copy: true })
+      feedbackTexture({ copy: true })
     })
   })
 
