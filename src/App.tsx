@@ -12,27 +12,6 @@ import fsDisplacement from "./shaders/basic-displacement.frag"
 import fsNoise from "./shaders/2d-snoise.frag"
 import fsBasic from "./shaders/basic.frag"
 
-const SOURCE = {
-  type: 'video',
-  sources: [
-    {
-      src: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4',
-      type: 'video/mp4',
-      size: 720,
-    },
-    {
-      src: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-1080p.mp4',
-      type: 'video/mp4',
-      size: 1080,
-    }
-  ]
-}
-
-const OPTIONS = {
-  autoplay: true,
-  muted: true,
-}
-
 type NoiseUniforms = {
   resolution: () => [number, number],
   scale: [number, number],
@@ -147,6 +126,7 @@ function makeDrawDisplacement({ feedbackTexture, startingImageTexture, texOffset
 }
 
 import imageUrl from './assets/dear.jpg'
+import Player from './Player';
 
 async function loadImage(url: string): Promise<HTMLImageElement> {
   const image = new Image()
@@ -156,14 +136,15 @@ async function loadImage(url: string): Promise<HTMLImageElement> {
 }
 
 function App() {
-  let divRef: HTMLDivElement | undefined
-  onMount(async () => {
-    if (!divRef) return;
-    const regl = initRegl(divRef)
+  let appRef: HTMLDivElement | undefined
+
+  async function startGL() {
+    if (!appRef) return;
+    const regl = initRegl(appRef.querySelector("#canv")! as HTMLDivElement)
     const mouse = initMouse()
 
-    const startingImage = await loadImage(imageUrl)
-
+    const startingImage = appRef.querySelector("video")! as HTMLVideoElement
+   
     const startingImageTexture = regl.texture({ data: startingImage, flipY: true })
 
     const feedbackTexture = regl.texture({ data: startingImage, flipY: true })
@@ -185,7 +166,7 @@ function App() {
     const drawDisplacement = regl({
       ...makeDrawDisplacement({
         feedbackTexture,
-        startingImageTexture,
+        startingImageTexture: () => startingImageTexture.subimage(startingImage),
         displacementMap: mapFbo,
         amp: 0.001,
         scale: 1.002,
@@ -215,12 +196,12 @@ function App() {
 
       feedbackTexture({ copy: true })
     })
-  })
+  }
 
   return (
-    <div ref={divRef!} class={styles.App}>
-      <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} ref={divRef!}></div>
-      <div style={{ position: "absolute", left: 0, top: 0, width: "30%" }}><SolidPlyr source={SOURCE} options={OPTIONS} /></div>
+    <div ref={appRef!} class={styles.App}>
+      <div id="canv" style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }}></div>
+      <div style={{ position: "absolute", left: 0, top: 0, width: "30%" }}><Player onPlaying={() => startGL()} /></div>
     </div>
   );
 }
