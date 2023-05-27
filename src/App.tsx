@@ -7,10 +7,9 @@ import initMouse from 'mouse-change'
 
 import fsFeedback from "./shaders/feedback.frag"
 import vsBasicUV from "./shaders/basic-uv.vert"
-import fsDisplacement from "./shaders/displacement.frag"
+import fsDisplacement from "./shaders/basic-displacement.frag"
 import fsNoise from "./shaders/2d-snoise.frag"
 import fsBasic from "./shaders/basic.frag"
-
 
 type NoiseUniforms = {
   resolution: () => [number, number]

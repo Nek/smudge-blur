@@ -18,13 +18,16 @@ float rgbToGray(vec4 rgba) {
   return dot(rgba.xyz, W);
 }
 
+#include uvScale.glsl;
+
 void main() {
   vec2 p = uv.xy;
+  p = uvScale(p, 1.);
   vec4 colorOrig = texture2D(texture, p);
   vec4 colorDisplaced = vec4(0.);
   vec4 displacement = texture2D(map, p);
   // displacement.a = 1.;
-  vec2 displace = p + (vec2(displacement.r, displacement.b) + 0.) * 1.;
+  vec2 displace = p + (vec2(displacement.r, displacement.b) - 0.25) * 0.01;
   colorDisplaced = texture2D(texture, displace);
-  gl_FragColor = mix(colorOrig, colorDisplaced, 1.);
+  gl_FragColor = mix(colorOrig, colorDisplaced, 0.25);
 }
