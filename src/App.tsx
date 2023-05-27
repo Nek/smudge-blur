@@ -122,7 +122,7 @@ function makeDrawDisplacement({ texture, texOffset = [0, 0], map, scale = 2.0, a
   })
 }
 
-import dove from './assets/dove.jpg'
+import imageUrl from './assets/dear.jpg'
 
 async function loadImage(url:string): Promise<HTMLImageElement> {
     const image = new Image()
@@ -138,7 +138,7 @@ function App() {
     const regl = initRegl()
     const mouse = initMouse()
 
-    const image = await loadImage(dove)
+    const image = await loadImage(imageUrl)
 
     const pixels = regl.texture({data: image, flipY: true})
 
