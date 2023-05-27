@@ -1,5 +1,6 @@
 import { Component, onMount } from 'solid-js';
 import styles from './App.module.css';
+import { SolidPlyr } from 'solid-plyr';
 
 import initRegl from 'regl'
 //@ts-ignore
@@ -11,12 +12,33 @@ import fsDisplacement from "./shaders/basic-displacement.frag"
 import fsNoise from "./shaders/2d-snoise.frag"
 import fsBasic from "./shaders/basic.frag"
 
+const SOURCE = {
+  type: 'video',
+  sources: [
+    {
+      src: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4',
+      type: 'video/mp4',
+      size: 720,
+    },
+    {
+      src: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-1080p.mp4',
+      type: 'video/mp4',
+      size: 1080,
+    }
+  ]
+}
+
+const OPTIONS = {
+  autoplay: true,
+  muted: true,
+}
+
 type NoiseUniforms = {
   resolution: () => [number, number],
   scale: [number, number],
 }
 
-function makeDrawNoise({scale = [1, 1]}) {
+function makeDrawNoise({ scale = [1, 1] }) {
   return ({
     frag: fsNoise,
 
@@ -126,25 +148,25 @@ function makeDrawDisplacement({ feedbackTexture, startingImageTexture, texOffset
 
 import imageUrl from './assets/dear.jpg'
 
-async function loadImage(url:string): Promise<HTMLImageElement> {
-    const image = new Image()
-    image.src = url
-    await image.decode()
-    return image
+async function loadImage(url: string): Promise<HTMLImageElement> {
+  const image = new Image()
+  image.src = url
+  await image.decode()
+  return image
 }
 
 function App() {
   let divRef: HTMLDivElement | undefined
   onMount(async () => {
     if (!divRef) return;
-    const regl = initRegl()
+    const regl = initRegl(divRef)
     const mouse = initMouse()
 
     const startingImage = await loadImage(imageUrl)
 
-    const startingImageTexture = regl.texture({data: startingImage, flipY: true})
+    const startingImageTexture = regl.texture({ data: startingImage, flipY: true })
 
-    const feedbackTexture = regl.texture({data: startingImage, flipY: true})
+    const feedbackTexture = regl.texture({ data: startingImage, flipY: true })
 
     const displacementFbo = regl.framebuffer({
       width: 1024,
@@ -172,7 +194,7 @@ function App() {
     })
 
     const drawNoise = regl({
-      ...makeDrawNoise({scale: [0.01, 0.01]}),
+      ...makeDrawNoise({ scale: [0.01, 0.01] }),
       framebuffer: () => mapFbo
     })
 
@@ -197,6 +219,8 @@ function App() {
 
   return (
     <div ref={divRef!} class={styles.App}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} ref={divRef!}></div>
+      <div style={{ position: "absolute", left: 0, top: 0, width: "30%" }}><SolidPlyr source={SOURCE} options={OPTIONS} /></div>
     </div>
   );
 }

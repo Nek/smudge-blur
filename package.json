@@ -11,14 +11,16 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^4.9.5",
-    "vite": "^4.1.1",
+    "typescript": "^5.0.4",
+    "vite": "^4.3.9",
     "vite-plugin-glsl": "^1.1.2",
-    "vite-plugin-solid": "^2.5.0"
+    "vite-plugin-solid": "^2.7.0"
   },
   "dependencies": {
     "mouse-change": "^1.4.0",
+    "plyr": "^3.7.8",
     "regl": "^2.1.0",
-    "solid-js": "^1.6.10"
+    "solid-js": "^1.7.5",
+    "solid-plyr": "github:Nek/solid-plyr"
   }
 }
