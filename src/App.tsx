@@ -138,7 +138,7 @@ function App() {
 
     const image = await loadImage(dove)
 
-    const pixels = regl.texture(image)
+    const pixels = regl.texture({data: image, flipY: true})
 
     const displacementFbo = regl.framebuffer({
       width: 1024,
