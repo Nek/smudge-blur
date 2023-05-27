@@ -28,5 +28,5 @@ void main() {
   vec4 displacement = texture2D(displacementMap, p);
   vec2 displace = p + (vec2(displacement.r, displacement.b) + texOffset) * amp;
   vec4 colorDisplaced = texture2D(feedbackTexture, displace);
-  gl_FragColor = mix(colorOrig, colorDisplaced, 0.995);
+  gl_FragColor = mix(colorOrig, colorDisplaced, 0.97);
 }

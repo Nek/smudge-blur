@@ -1,12 +1,9 @@
-import { Component, onMount } from 'solid-js';
 import styles from './App.module.css';
-import { SolidPlyr } from 'solid-plyr';
 
 import initRegl from 'regl'
 //@ts-ignore
 import initMouse from 'mouse-change'
 
-import fsFeedback from "./shaders/feedback.frag"
 import vsBasicUV from "./shaders/basic-uv.vert"
 import fsDisplacement from "./shaders/basic-displacement.frag"
 import fsNoise from "./shaders/2d-snoise.frag"
@@ -15,6 +12,7 @@ import fsBasic from "./shaders/basic.frag"
 type NoiseUniforms = {
   resolution: () => [number, number],
   scale: [number, number],
+  canv: HTMLDivElement,
 }
 
 function makeDrawNoise({ scale = [1, 1] }) {
@@ -31,43 +29,14 @@ function makeDrawNoise({ scale = [1, 1] }) {
     },
 
     uniforms: {
-      resolution: ({ viewportWidth, viewportHeight }: { viewportWidth: number, viewportHeight: number }) => [viewportWidth, viewportHeight],
+      resolution: [1920, 1080],
       scale,
     },
 
     count: 3
   })
 }
-
-type FeedbackUniforms = {
-  mouse: any
-  texture: initRegl.Texture2D
-}
-function makeDrawFeedback({ mouse, texture: pixels }: FeedbackUniforms) {
-  return ({
-    frag: fsFeedback,
-
-    vert: vsBasicUV,
-
-    attributes: {
-      position: [
-        -2, 0,
-        0, -2,
-        2, 2]
-    },
-
-    uniforms: {
-      texture: pixels,
-      mouse: ({ pixelRatio, viewportHeight }) => [
-        mouse.x * pixelRatio,
-        viewportHeight - mouse.y * pixelRatio
-      ],
-      t: ({ tick }) => 0.01 * tick
-    },
-
-    count: 3
-  })
-}
+import animalsUrl from "./assets/animals.mp4"
 
 function makeDrawBasic({ texture }: { texture: initRegl.Texture2D }) {
   return ({
@@ -125,24 +94,12 @@ function makeDrawDisplacement({ feedbackTexture, startingImageTexture, texOffset
   })
 }
 
-import imageUrl from './assets/dear.jpg'
-import Player from './Player';
-
-async function loadImage(url: string): Promise<HTMLImageElement> {
-  const image = new Image()
-  image.src = url
-  await image.decode()
-  return image
-}
-
 function App() {
   let appRef: HTMLDivElement | undefined
 
   async function startGL() {
     if (!appRef) return;
-    const regl = initRegl(appRef.querySelector("#canv")! as HTMLDivElement)
-    const mouse = initMouse()
-
+    const regl = initRegl(appRef.querySelector("canvas")! as HTMLCanvasElement)
     const startingImage = appRef.querySelector("video")! as HTMLVideoElement
    
     const startingImageTexture = regl.texture({ data: startingImage, flipY: true })
@@ -150,16 +107,14 @@ function App() {
     const feedbackTexture = regl.texture({ data: startingImage, flipY: true })
 
     const displacementFbo = regl.framebuffer({
-      width: 1024,
-      height: 1024,
+      width: 1920,
+      height: 1080,
       depth: false
     })
 
-    const drawFeedback = regl(makeDrawFeedback({ mouse, texture: displacementFbo }))
-
     const mapFbo = regl.framebuffer({
-      width: 1024,
-      height: 1024,
+      width: 1920,
+      height: 1080,
       depth: false
     })
 
@@ -180,7 +135,11 @@ function App() {
     })
 
     regl.frame(function ({ viewportWidth, viewportHeight }) {
-      mapFbo.resize(viewportWidth, viewportHeight)
+      regl.clear({
+        color: [0, 0, 0, 1]
+      })
+
+      // mapFbo.resize(viewportWidth, viewportHeight)
 
       regl.clear({
         color: [0, 0, 0, 1]
@@ -200,8 +159,8 @@ function App() {
 
   return (
     <div ref={appRef!} class={styles.App}>
-      <div id="canv" style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }}></div>
-      <div style={{ position: "absolute", left: 0, top: 0, width: "30%" }}><Player onPlaying={() => startGL()} /></div>
+      <video style={{position: "absolute", "z-index": -1, width: "100%", height: "100%", "object-fit": "cover"}} width={1920} height={1080}  controls={false} preload={'auto'} src={animalsUrl} autoplay={true} muted={true} onplaying={startGL}/>
+      <canvas width={1920} height={1080} style={{ width: "100%", height: "100%", "object-fit" : "cover"}}/>
     </div>
   );
 }
