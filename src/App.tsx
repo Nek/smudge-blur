@@ -9,9 +9,15 @@ import fsFeedback from "./shaders/feedback.frag?raw"
 import vsBasicUV from "./shaders/basic-uv.vert?raw"
 import fsDisplacement from "./shaders/displacement.frag?raw"
 import fsNoise from "./shaders/2d-snoise.frag?raw"
+import fsBasic from "./shaders/basic.frag?raw"
 
-function makeDrawNoise(regl: initRegl.Regl, resolution: [number, number]) {
-  return regl({
+
+type NoiseUniforms = {
+  resolution: () => [number, number]
+}
+
+function makeDrawNoise() {
+  return ({
     frag: fsNoise,
 
     vert: vsBasicUV,
@@ -24,15 +30,19 @@ function makeDrawNoise(regl: initRegl.Regl, resolution: [number, number]) {
     },
 
     uniforms: {
-      resolution,
+      resolution: ({ viewportWidth, viewportHeight }: { viewportWidth: number, viewportHeight: number }) => [viewportWidth, viewportHeight],
     },
 
     count: 3
   })
 }
 
-function makeDrawFeedback(regl: initRegl.Regl, mouse: any, pixels: initRegl.Texture2D) {
-  return regl({
+type FeedbackUniforms = {
+  mouse: any
+  texture: initRegl.Texture2D
+}
+function makeDrawFeedback({ mouse, texture: pixels }: FeedbackUniforms) {
+  return ({
     frag: fsFeedback,
 
     vert: vsBasicUV,
@@ -57,8 +67,39 @@ function makeDrawFeedback(regl: initRegl.Regl, mouse: any, pixels: initRegl.Text
   })
 }
 
-function makeDrawDisplacement(regl: initRegl.Regl, displacement: initRegl.Texture2D) {
-  return regl({
+function makeDrawBasic({ texture }: { texture: initRegl.Texture2D }) {
+  return ({
+    frag: fsBasic,
+
+    vert: vsBasicUV,
+
+    attributes: {
+      position: [
+        -2, 0,
+        0, -2,
+        2, 2]
+    },
+
+    uniforms: {
+      texture
+    },
+
+    count: 3
+  })
+}
+
+type DisplacementUniforms = {
+  texture: initRegl.Texture2D,
+  texOffset?: [number, number],
+  map: initRegl.Texture2D,
+  mode?: number,
+  amp?: number,
+  divider?: number,
+  rotRange?: number,
+}
+
+function makeDrawDisplacement({ texture, texOffset = [0, 0], map, mode = 0, amp = 0.1, divider = 0.5, rotRange = 6.283185307179586 }: DisplacementUniforms) {
+  return ({
     frag: fsDisplacement,
 
     vert: vsBasicUV,
@@ -71,48 +112,86 @@ function makeDrawDisplacement(regl: initRegl.Regl, displacement: initRegl.Textur
     },
 
     uniforms: {
-      texture: displacement,
-      texOffset: [0, 0]
+      texture,
+      texOffset,
+      map,
+      mode,
+      amp,
+      divider,
+      rotRange,
     },
 
     count: 3
   })
 }
 
+import dove from './assets/dove.jpg'
+
+async function loadImage(url:string): Promise<HTMLImageElement> {
+    const image = new Image()
+    image.src = url
+    await image.decode()
+    return image
+}
 
 function App() {
   let divRef: HTMLDivElement | undefined
-  onMount(() => {
+  onMount(async () => {
     if (!divRef) return;
     const regl = initRegl()
     const mouse = initMouse()
 
-    const pixels = regl.texture()
+    const image = await loadImage(dove)
 
-    // const drawFeedback = makeDrawFeedback(regl, mouse, pixels)
+    const pixels = regl.texture(image)
 
-    // const displacement = regl.texture()
+    const displacementFbo = regl.framebuffer({
+      width: 1024,
+      height: 1024,
+      depth: false
+    })
 
-    // const drawDisplacement = makeDrawDisplacement(regl, pixels)
+    const drawFeedback = regl(makeDrawFeedback({ mouse, texture: displacementFbo }))
 
-    const drawNoise = makeDrawNoise(regl, [1024,1024])
+    const mapFbo = regl.framebuffer({
+      width: 1024,
+      height: 1024,
+      depth: false
+    })
 
-    regl.frame(function () {
+    const drawDisplacement = regl({
+      ...makeDrawDisplacement({
+        texture: pixels,
+        map: mapFbo,
+        mode: 3,
+        amp: 0.01,
+      })
+    })
+
+    const drawNoise = regl({
+      ...makeDrawNoise(),
+      framebuffer: () => mapFbo
+    })
+
+    regl.frame(function ({ viewportWidth, viewportHeight }) {
+      mapFbo.resize(viewportWidth, viewportHeight)
+
       regl.clear({
         color: [0, 0, 0, 1]
       })
 
-      // drawFeedback()
-
-      // drawDisplacement()
-
       drawNoise()
 
-      // pixels({
-      //   copy: true
-      // })
+      regl.clear({
+        color: [0, 0, 0, 1]
+      })
+
+      drawDisplacement()
+
+      pixels({ copy: true })
     })
   })
+
   return (
     <div ref={divRef!} class={styles.App}>
     </div>
