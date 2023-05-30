@@ -159,7 +159,7 @@ function App() {
 
   return (
     <div ref={appRef!} class={styles.App}>
-      <video style={{position: "absolute", "z-index": -1, width: "100%", height: "100%", "object-fit": "cover"}} width={1920} height={1080}  controls={false} preload={'auto'} src={animalsUrl} autoplay={true} muted={true} onplaying={startGL}/>
+      <video crossorigin='anonymous' style={{position: "absolute", "z-index": -1, width: "100%", height: "100%", "object-fit": "cover"}} width={1920} height={1080}  controls={false} preload={'auto'} src={animalsUrl} autoplay={true} muted={true} onplaying={startGL}/>
       <canvas width={1920} height={1080} style={{ width: "100%", height: "100%", "object-fit" : "cover"}}/>
     </div>
   );
