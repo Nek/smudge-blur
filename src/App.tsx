@@ -1,31 +1,28 @@
-import styles from './App.module.css';
+import styles from "./App.module.css";
 
-import initRegl from 'regl'
+import initRegl from "regl";
 //@ts-ignore
-import initMouse from 'mouse-change'
+import initMouse from "mouse-change";
 
-import vsBasicUV from "./shaders/basic-uv.vert"
-import fsDisplacement from "./shaders/basic-displacement.frag"
-import fsNoise from "./shaders/2d-snoise.frag"
-import fsBasic from "./shaders/basic.frag"
+import vsBasicUV from "./shaders/basic-uv.vert";
+import fsDisplacement from "./shaders/basic-displacement.frag";
+import fsNoise from "./shaders/2d-snoise.frag";
+import fsBasic from "./shaders/basic.frag";
 
 type NoiseUniforms = {
-  resolution: () => [number, number],
-  scale: [number, number],
-  canv: HTMLDivElement,
-}
+  resolution: () => [number, number];
+  scale: [number, number];
+  canv: HTMLDivElement;
+};
 
 function makeDrawNoise({ scale = [1, 1] }) {
-  return ({
+  return {
     frag: fsNoise,
 
     vert: vsBasicUV,
 
     attributes: {
-      position: [
-        -2, 0,
-        0, -2,
-        2, 2]
+      position: [-2, 0, 0, -2, 2, 2],
     },
 
     uniforms: {
@@ -33,52 +30,52 @@ function makeDrawNoise({ scale = [1, 1] }) {
       scale,
     },
 
-    count: 3
-  })
+    count: 3,
+  };
 }
-import animalsUrl from "./assets/animals.mp4"
 
 function makeDrawBasic({ texture }: { texture: initRegl.Texture2D }) {
-  return ({
+  return {
     frag: fsBasic,
 
     vert: vsBasicUV,
 
     attributes: {
-      position: [
-        -2, 0,
-        0, -2,
-        2, 2]
+      position: [-2, 0, 0, -2, 2, 2],
     },
 
     uniforms: {
-      texture
+      texture,
     },
 
-    count: 3
-  })
+    count: 3,
+  };
 }
 
 type DisplacementUniforms = {
-  feedbackTexture: initRegl.Texture2D,
-  startingImageTexture: initRegl.Texture2D,
-  texOffset?: [number, number],
-  displacementMap: initRegl.Texture2D,
-  scale?: number,
-  amp?: number,
-}
+  feedbackTexture: initRegl.Texture2D;
+  startingImageTexture: initRegl.Texture2D;
+  texOffset?: [number, number];
+  displacementMap: initRegl.Texture2D;
+  scale?: number;
+  amp?: number;
+};
 
-function makeDrawDisplacement({ feedbackTexture, startingImageTexture, texOffset = [0, 0], displacementMap, scale = 2.0, amp = 0.0025 }: DisplacementUniforms) {
-  return ({
+function makeDrawDisplacement({
+  feedbackTexture,
+  startingImageTexture,
+  texOffset = [0, 0],
+  displacementMap,
+  scale = 2.0,
+  amp = 0.0025,
+}: DisplacementUniforms) {
+  return {
     frag: fsDisplacement,
 
     vert: vsBasicUV,
 
     attributes: {
-      position: [
-        -2, 0,
-        0, -2,
-        2, 2]
+      position: [-2, 0, 0, -2, 2, 2],
     },
 
     uniforms: {
@@ -90,77 +87,126 @@ function makeDrawDisplacement({ feedbackTexture, startingImageTexture, texOffset
       amp,
     },
 
-    count: 3
-  })
+    count: 3,
+  };
 }
 
+
 function App() {
-  let appRef: HTMLDivElement | undefined
+  let appRef: HTMLDivElement | undefined;
+  let startingImage: HTMLVideoElement; 
+
+  async function startCam() {
+    if (!appRef) return;
+    startingImage = appRef.querySelector("video")! as HTMLVideoElement;
+
+    const constraints = {
+      audio: false,
+      video: {
+        width: 1920,
+        height: 1080,
+      },
+    };
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    startingImage.srcObject = stream;
+
+    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+
+    startingImage.srcObject = mediaStream;
+    startingImage.onloadedmetadata = () => {
+      startingImage.play();
+    };
+  }
 
   async function startGL() {
     if (!appRef) return;
-    const regl = initRegl(appRef.querySelector("canvas")! as HTMLCanvasElement)
-    const startingImage = appRef.querySelector("video")! as HTMLVideoElement
-   
-    const startingImageTexture = regl.texture({ data: startingImage, flipY: true })
+    const regl = initRegl(appRef.querySelector("canvas")! as HTMLCanvasElement);
 
-    const feedbackTexture = regl.texture({ data: startingImage, flipY: true })
+    const startingImageTexture = regl.texture({
+      data: startingImage,
+      flipY: true,
+    });
+
+    const feedbackTexture = regl.texture({ data: startingImage, flipY: true });
 
     const displacementFbo = regl.framebuffer({
       width: 1920,
       height: 1080,
-      depth: false
-    })
+      depth: false,
+    });
 
     const mapFbo = regl.framebuffer({
       width: 1920,
       height: 1080,
-      depth: false
-    })
+      depth: false,
+    });
 
     const drawDisplacement = regl({
       ...makeDrawDisplacement({
         feedbackTexture,
-        startingImageTexture: () => startingImageTexture.subimage(startingImage),
-        displacementMap: mapFbo,
-        amp: 0.001,
-        scale: 1.002,
-        texOffset: [0, 0]
-      })
-    })
+        startingImageTexture: () =>
+          startingImageTexture.subimage(startingImage),
+          displacementMap: mapFbo,
+          amp: 0.001,
+          scale: 1.002,
+          texOffset: [0, 0],
+       }),
+    });
 
     const drawNoise = regl({
       ...makeDrawNoise({ scale: [0.01, 0.01] }),
-      framebuffer: () => mapFbo
-    })
+      framebuffer: () => mapFbo,
+    });
 
     regl.frame(function ({ viewportWidth, viewportHeight }) {
       regl.clear({
-        color: [0, 0, 0, 1]
-      })
+        color: [0, 0, 0, 1],
+      });
 
       // mapFbo.resize(viewportWidth, viewportHeight)
 
       regl.clear({
-        color: [0, 0, 0, 1]
-      })
+        color: [0, 0, 0, 1],
+      });
 
-      drawNoise()
+      drawNoise();
 
       regl.clear({
-        color: [0, 0, 0, 1]
-      })
+        color: [0, 0, 0, 1],
+      });
 
-      drawDisplacement()
+      drawDisplacement();
 
-      feedbackTexture({ copy: true })
-    })
+      feedbackTexture({ copy: true });
+    });
   }
 
   return (
-    <div ref={appRef!} class={styles.App}>
-      <video crossorigin='anonymous' style={{position: "absolute", "z-index": -1, width: "100%", height: "100%", "object-fit": "cover"}} width={1920} height={1080}  controls={false} preload={'auto'} src={animalsUrl} autoplay={true} muted={true} onplaying={startGL}/>
-      <canvas width={1920} height={1080} style={{ width: "100%", height: "100%", "object-fit" : "cover"}}/>
+    <div ref={appRef!} class={styles.App} onclick={startCam}>
+      <video
+        crossorigin="anonymous"
+        style={{
+          position: "absolute",
+          "z-index": -1,
+          width: "100%",
+          height: "100%",
+          // "object-fit": "cover",
+        }}
+        width={1920}
+        height={1080}
+        controls={false}
+        // preload={"auto"}
+        // src={animalsUrl}
+        autoplay={true}
+        // muted={true}
+        onplaying={startGL}
+      />
+      <canvas
+        width={1920}
+        height={1080}
+        style={{ width: "100%", height: "100%", "object-fit": "cover" }}
+      />
     </div>
   );
 }
