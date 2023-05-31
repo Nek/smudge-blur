@@ -1,8 +1,6 @@
 import styles from "./App.module.css";
 
 import initRegl from "regl";
-//@ts-ignore
-import initMouse from "mouse-change";
 
 import vsBasicUV from "./shaders/basic-uv.vert";
 import fsDisplacement from "./shaders/basic-displacement.frag";
@@ -28,24 +26,6 @@ function makeDrawNoise({ scale = [1, 1] }) {
     uniforms: {
       resolution: [1920, 1080],
       scale,
-    },
-
-    count: 3,
-  };
-}
-
-function makeDrawBasic({ texture }: { texture: initRegl.Texture2D }) {
-  return {
-    frag: fsBasic,
-
-    vert: vsBasicUV,
-
-    attributes: {
-      position: [-2, 0, 0, -2, 2, 2],
-    },
-
-    uniforms: {
-      texture,
     },
 
     count: 3,
@@ -91,14 +71,14 @@ function makeDrawDisplacement({
   };
 }
 
-
 function App() {
   let appRef: HTMLDivElement | undefined;
-  let startingImage: HTMLVideoElement; 
+  let startingImage: HTMLVideoElement | undefined;
 
   async function startCam() {
     if (!appRef) return;
-    startingImage = appRef.querySelector("video")! as HTMLVideoElement;
+    if (startingImage) return;
+    startingImage = appRef.querySelector("video") as HTMLVideoElement;
 
     const constraints = {
       audio: false,
@@ -191,15 +171,13 @@ function App() {
           "z-index": -1,
           width: "100%",
           height: "100%",
-          // "object-fit": "cover",
+          "object-fit": "cover",
         }}
         width={1920}
         height={1080}
         controls={false}
-        // preload={"auto"}
-        // src={animalsUrl}
         autoplay={true}
-        // muted={true}
+        muted={true}
         onplaying={startGL}
       />
       <canvas
