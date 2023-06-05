@@ -80,9 +80,10 @@ function App() {
     if (startingImage) return;
     startingImage = appRef.querySelector("video") as HTMLVideoElement;
 
-    const constraints = {
+    const constraints: MediaStreamConstraints = {
       audio: false,
       video: {
+        frameRate: 60,
         width: 1920,
         height: 1080,
       },
@@ -109,12 +110,6 @@ function App() {
     });
 
     const feedbackTexture = regl.texture({ data: startingImage, flipY: true });
-
-    const displacementFbo = regl.framebuffer({
-      width: 1920,
-      height: 1080,
-      depth: false,
-    });
 
     const mapFbo = regl.framebuffer({
       width: 1920,
@@ -144,7 +139,7 @@ function App() {
         color: [0, 0, 0, 1],
       });
 
-      // mapFbo.resize(viewportWidth, viewportHeight)
+      mapFbo.resize(viewportWidth, viewportHeight)
 
       regl.clear({
         color: [0, 0, 0, 1],
@@ -183,7 +178,7 @@ function App() {
       <canvas
         width={1920}
         height={1080}
-        style={{ width: "100%", height: "100%", "object-fit": "cover" }}
+        style={{ width: "100%", height: "100%", "object-fit": "cover", transform: "scale(-1, 1)", }}
       />
     </div>
   );
