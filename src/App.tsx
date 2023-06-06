@@ -8,12 +8,12 @@ import fsNoise from "./shaders/2d-snoise.frag";
 import fsBasic from "./shaders/basic.frag";
 
 type NoiseUniforms = {
-  resolution: () => [number, number];
-  scale: [number, number];
-  canv: HTMLDivElement;
+  resolution: () => [number, number]
+  scale: [number, number]
+  time: number
 };
 
-function makeDrawNoise({ scale = [3.0, 3.0] }) {
+function makeDrawNoise({ scale = [3.0, 3.0] }: NoiseUniforms) {
   return {
     frag: fsNoise,
 
@@ -26,6 +26,7 @@ function makeDrawNoise({ scale = [3.0, 3.0] }) {
     uniforms: {
       resolution: [1920, 1080],
       scale,
+      time: ({ tick }: {tick: number}) => tick * 0.005,
     },
 
     count: 3,

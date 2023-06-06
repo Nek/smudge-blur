@@ -4,6 +4,7 @@ precision mediump float;
 
 uniform vec2 resolution;
 uniform vec2 scale;
+uniform float time;
 
 #include lygia/generative/snoise.glsl
 #include uvScale.glsl
@@ -17,7 +18,7 @@ void main() {
     // Scale the space in order to see the function
     // st *= 1.;
 
-    color = snoise3(vec3(st, .5));
+    color = snoise3(vec3(st, cos(time) * 0.5 + 0.5));
     color *= 0.5;
     color += .5;
 
