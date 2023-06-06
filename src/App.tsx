@@ -75,6 +75,13 @@ function App() {
   let appRef: HTMLDivElement | undefined;
   let startingImage: HTMLVideoElement | undefined;
 
+  function fullScreen() {
+    if (!appRef) return;
+    if (appRef.requestFullscreen) {
+      appRef.requestFullscreen();
+    }
+  }
+  
   async function startCam() {
     if (!appRef) return;
     if (startingImage) return;
@@ -179,6 +186,7 @@ function App() {
         width={1920}
         height={1080}
         style={{ width: "100%", height: "100%", "object-fit": "cover", transform: "scale(-1, 1)", }}
+        ondblclick={fullScreen}
       />
     </div>
   );
