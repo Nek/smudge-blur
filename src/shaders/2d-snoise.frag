@@ -9,7 +9,7 @@ uniform vec2 scale;
 #include uvScale.glsl
 
 void main() {
-    vec2 st = gl_FragCoord.xy/resolution.xy;
+    vec2 st = gl_FragCoord.xy/resolution.xy*scale;
     st.x *= resolution.x/resolution.y;
 
     vec3 color = vec3(0.0);
@@ -17,7 +17,7 @@ void main() {
     // Scale the space in order to see the function
     // st *= 1.;
 
-    color = snoise3(vec3(uvScale(st, scale), .1));
+    color = snoise3(vec3(st, 1));
     color *= 0.5;
     color += .5;
 

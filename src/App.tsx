@@ -13,7 +13,7 @@ type NoiseUniforms = {
   canv: HTMLDivElement;
 };
 
-function makeDrawNoise({ scale = [1, 1] }) {
+function makeDrawNoise({ scale = [3.0, 3.0] }) {
   return {
     frag: fsNoise,
 
@@ -35,19 +35,17 @@ function makeDrawNoise({ scale = [1, 1] }) {
 type DisplacementUniforms = {
   feedbackTexture: initRegl.Texture2D;
   startingImageTexture: initRegl.Texture2D;
-  texOffset?: [number, number];
   displacementMap: initRegl.Texture2D;
   scale?: number;
-  amp?: number;
+  zoom?: [number, number];
 };
 
 function makeDrawDisplacement({
   feedbackTexture,
   startingImageTexture,
-  texOffset = [0, 0],
   displacementMap,
-  scale = 2.0,
-  amp = 0.0025,
+  scale = 0.001,
+  zoom = [1.01, 1.01],
 }: DisplacementUniforms) {
   return {
     frag: fsDisplacement,
@@ -61,10 +59,9 @@ function makeDrawDisplacement({
     uniforms: {
       feedbackTexture,
       startingImageTexture,
-      texOffset,
       displacementMap,
       scale,
-      amp,
+      zoom,
     },
 
     count: 3,
@@ -97,6 +94,7 @@ function App() {
     };
 
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    console.log(stream);
     startingImage.srcObject = stream;
 
     const mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
@@ -130,14 +128,13 @@ function App() {
         startingImageTexture: () =>
           startingImageTexture.subimage(startingImage),
           displacementMap: mapFbo,
-          amp: 0.001,
-          scale: 1.002,
-          texOffset: [0, 0],
+          scale: 0.001,
+          zoom: [1.01, 1.01],
        }),
     });
 
     const drawNoise = regl({
-      ...makeDrawNoise({ scale: [0.01, 0.01] }),
+      ...makeDrawNoise({ scale: [3.0, 3.0] }),
       framebuffer: () => mapFbo,
     });
 

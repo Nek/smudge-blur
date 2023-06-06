@@ -5,12 +5,12 @@ precision mediump int;
 
 uniform sampler2D feedbackTexture;
 uniform sampler2D startingImageTexture;
-uniform vec2 texOffset;// [-0.25, -0.25]
+uniform sampler2D displacementMap;
+
 varying vec2 uv;
 
-uniform sampler2D displacementMap;
-uniform float amp;// = 0.0025;
 uniform float scale;// = 0.001;
+uniform vec2 zoom;//1.01
 
 #define TWO_PI = 6.28318531;
 
@@ -19,14 +19,22 @@ float rgbToGray(vec4 rgba) {
   return dot(rgba.xyz, W);
 }
 
+vec2 toCartesian(vec4 displacementMap) {
+  float angle = displacementMap.x * 6.28318531;
+  float distance = (1. - (displacementMap.y * 0.09 + .01)) * scale;
+	float x = distance * cos(angle);
+  float y = distance * sin(angle);
+	return vec2(x, y);
+}
+
 #include uvScale.glsl
 
 void main() {
   vec2 p = uv.xy;
-  p = uvScale(p, scale);
+  p = uvScale(p, zoom);
   vec4 colorOrig = texture2D(startingImageTexture, p);
-  vec4 displacement = texture2D(displacementMap, p);
-  vec2 displace = p + (vec2(displacement.r, displacement.b) + texOffset) * amp;
+  // vec4 displacement = (texture2D(displacementMap, p) + vec4(texOffset, 0.0, 0.0)) * vec4(amp, 1.0, 1.0);
+  vec2 displace =  p + toCartesian(texture2D(displacementMap, p));//p + displacement.rg;
   vec4 colorDisplaced = texture2D(feedbackTexture, displace);
-  gl_FragColor = mix(colorOrig, colorDisplaced, 0.97);
+  gl_FragColor = mix(colorOrig, colorDisplaced, 0.95);//texture2D(displacementMap, p);;
 }
