@@ -14,14 +14,9 @@ uniform vec2 zoom;//1.01
 
 #define TWO_PI = 6.28318531;
 
-float rgbToGray(vec4 rgba) {
-  const vec3 W = vec3(0.2125, 0.7154, 0.0721);
-  return dot(rgba.xyz, W);
-}
-
 vec2 toCartesian(vec4 displacementMap) {
   float angle = displacementMap.x * 6.28318531;
-  float distance = (1. - (displacementMap.y * 0.09 + .01)) * scale;
+  float distance = (1. - (displacementMap.y * .09 + .01)) * scale;
 	float x = distance * cos(angle);
   float y = distance * sin(angle);
 	return vec2(x, y);
@@ -34,7 +29,7 @@ void main() {
   p = uvScale(p, zoom);
   vec4 colorOrig = texture2D(startingImageTexture, p);
   // vec4 displacement = (texture2D(displacementMap, p) + vec4(texOffset, 0.0, 0.0)) * vec4(amp, 1.0, 1.0);
-  vec2 displace =  p + toCartesian(texture2D(displacementMap, p));//p + displacement.rg;
+  vec2 displace =  p + toCartesian(texture2D(displacementMap, uv.xy));//p + displacement.rg;
   vec4 colorDisplaced = texture2D(feedbackTexture, displace);
-  gl_FragColor = mix(colorOrig, colorDisplaced, 0.95);//texture2D(displacementMap, p);;
+  gl_FragColor = mix(colorOrig, colorDisplaced, .98);//texture2D(displacementMap, p);;
 }

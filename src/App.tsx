@@ -44,8 +44,8 @@ function makeDrawDisplacement({
   feedbackTexture,
   startingImageTexture,
   displacementMap,
-  scale = 0.001,
-  zoom = [1.01, 1.01],
+  scale = 0.0001,
+  zoom = [1.001, 1.001],
 }: DisplacementUniforms) {
   return {
     frag: fsDisplacement,
@@ -129,12 +129,12 @@ function App() {
           startingImageTexture.subimage(startingImage),
           displacementMap: mapFbo,
           scale: 0.001,
-          zoom: [1.01, 1.01],
+          zoom: [1.005, 1.005],
        }),
     });
 
     const drawNoise = regl({
-      ...makeDrawNoise({ scale: [3.0, 3.0] }),
+      ...makeDrawNoise({ scale: [2.0, 2.0] }),
       framebuffer: () => mapFbo,
     });
 
